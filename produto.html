@@ -3,16 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mega Móveis Alagoas - Móveis de Qualidade</title>
+    <title>Detalhes do Produto - Mega Móveis Alagoas</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/product.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="images/logo/favicon.png" type="image/png">
 </head>
 <body>
     <!-- Cabeçalho -->
     <header id="main-header">
         <div class="container header-container">
             <div class="logo">
-                <img src="img/logo/LogoSemFundo.png" alt="Mega Móveis Alagoas">
+                <img src="images/logo/logo-minimalista-dourado-preto.png" alt="Mega Móveis Alagoas">
                 <div class="logo-text">
                     <h1>Mega Móveis</h1>
                     <p>Alagoas</p>
@@ -20,9 +23,9 @@
             </div>
             <nav id="main-nav">
                 <ul>
-                    <li><a href="#home">Início</a></li>
-                    <li><a href="#categories">Categorias</a></li>
-                    <li><a href="#contact">Contato</a></li>
+                    <li><a href="index.html">Início</a></li>
+                    <li><a href="index.html#categories">Categorias</a></li>
+                    <li><a href="index.html#contact">Contato</a></li>
                 </ul>
             </nav>
             <div class="mobile-menu" id="mobile-menu">
@@ -31,56 +34,34 @@
         </div>
     </header>
 
-    <!-- Banner Principal -->
-    <section id="home" class="hero">
+    <!-- Conteúdo Principal -->
+    <main class="product-page">
         <div class="container">
-            <h2>Móveis de Qualidade para Seu Lar</h2>
-            <p>Conforto, estilo e durabilidade em um só lugar</p>
-            <a href="#categories" class="btn">Ver Produtos</a>
-        </div>
-    </section>
+            <div class="breadcrumb">
+                <a href="index.html">Home</a> &gt; 
+                <a href="index.html#categories">Produtos</a> &gt; 
+                <span id="product-category-breadcrumb"></span> &gt; 
+                <span id="product-name-breadcrumb"></span>
+            </div>
 
-    <!-- Carrossel de Promoções -->
-    <section class="promo-carousel">
-        <div class="wave"></div>
+            <div class="product-container" id="product-container">
+                <!-- Conteúdo será preenchido via JavaScript -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Produtos Relacionados -->
+    <section class="related-products">
         <div class="container">
-            <h2><span class="highlight">PROMOÇÕES</span> ESPECIAIS</h2>
-            <div class="carousel-container">
-                <div class="carousel-track" id="carousel-track">
-                    <!-- Produtos em promoção serão inseridos aqui via JS -->
-                </div>
-                <button class="carousel-btn prev" id="prev-btn"><i class="fas fa-chevron-left"></i></button>
-                <button class="carousel-btn next" id="next-btn"><i class="fas fa-chevron-right"></i></button>
+            <h2>Produtos Relacionados</h2>
+            <div class="product-grid" id="related-products-grid">
+                <!-- Produtos relacionados serão inseridos aqui via JS -->
             </div>
         </div>
     </section>
 
-    <!-- Categorias -->
-    <section id="categories" class="categories">
-        <div class="wave wave1"></div>
-        <div class="wave wave2"></div>
-        <div class="wave wave3"></div>
-        <div class="container">
-            <h2>Nossas Categorias</h2>
-            <div class="category-grid" id="category-grid">
-                <!-- Categorias serão inseridas aqui via JS -->
-            </div>
-        </div>
-    </section>
-
-
-    <!-- Produtos em Destaque -->
-    <section class="featured-products">
-        <div class="container">
-            <h2>Produtos em Destaque</h2>
-            <div class="product-grid" id="product-grid">
-                <!-- Produtos serão inseridos aqui via JS -->
-            </div>
-        </div>
-    </section>
-
-     <!-- Rodapé -->
-     <footer id="contact">
+    <!-- Rodapé -->
+    <footer id="contact">
         <div class="container footer-container">
             <div class="footer-info">
                 <h3>Mega Móveis</h3>
@@ -107,6 +88,14 @@
         </div>
     </footer>
 
-    <script src="js/main.js"></script>
+    <!-- Modal para imagens -->
+    <div class="image-modal" id="image-modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <img id="modal-image" src="" alt="Imagem ampliada">
+        </div>
+    </div>
+
+    <script src="js/product.js"></script>
 </body>
 </html>
