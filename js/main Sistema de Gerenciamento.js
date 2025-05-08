@@ -26,6 +26,9 @@ document.addEventListener('DOMContentLoaded', function() {
     let products = [];
     let categories = [];
 
+    // Adicione esta variável no início com as outras declarações
+    const statusFilter = document.getElementById('status-filter');
+
     // URL do arquivo JSON
     const JSON_URL = 'json/produtos.json';
 
@@ -75,7 +78,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Funções principais
-    function loadProducts(filterCategory = '', searchTerm = '') {
+    function loadProducts(filterCategory = '', searchTerm = '', filterStatus = '') {
         productsTableBody.innerHTML = '';
         
         const filteredProducts = products.filter(product => {
@@ -83,9 +86,18 @@ document.addEventListener('DOMContentLoaded', function() {
             const matchesSearch = searchTerm === '' || 
                 product.nome.toLowerCase().includes(searchTerm.toLowerCase()) || 
                 product.id.toString().includes(searchTerm.toLowerCase());
-            return matchesCategory && matchesSearch;
+            
+            // Adicione a verificação do status
+            let matchesStatus = true;
+            if (filterStatus !== '') {
+                const productStatus = getProductStatus(product);
+                matchesStatus = productStatus === filterStatus;
+            }
+            
+            return matchesCategory && matchesSearch && matchesStatus;
         });
         
+        // Restante da função permanece igual
         if (filteredProducts.length === 0) {
             const row = document.createElement('tr');
             row.innerHTML = `<td colspan="8" class="text-center">Nenhum produto encontrado</td>`;
@@ -181,6 +193,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function setupEventListeners() {
+        statusFilter.addEventListener('change', () => {
+            loadProducts(categoryFilter.value, productSearch.value, statusFilter.value);
+        });
+        
+        // Certifique-se de que os outros filtros também considerem o status
+        categoryFilter.addEventListener('change', () => {
+            loadProducts(categoryFilter.value, productSearch.value, statusFilter.value);
+        });
+        
+        productSearch.addEventListener('input', () => {
+            loadProducts(categoryFilter.value, productSearch.value, statusFilter.value);
+        });
         // Filtros e busca
         categoryFilter.addEventListener('change', () => {
             loadProducts(categoryFilter.value, productSearch.value);
