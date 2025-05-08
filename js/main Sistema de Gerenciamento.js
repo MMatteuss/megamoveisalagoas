@@ -1,54 +1,4 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Dados iniciais (simulando um banco de dados)
-    let products = [
-        {
-            id: 1,
-            name: "Sofá Capelinha 3 Lugares",
-            category: "Sofás",
-            price: 1899.90,
-            description: "Sofá em couro sintético, estrutura em madeira maciça",
-            stock: 15,
-            code: "SOF001",
-            images: ["sofa1.jpg"],
-            status: "active"
-        },
-        {
-            id: 2,
-            name: "Mesa de Jantar Retrátil",
-            category: "Mesas",
-            price: 799.90,
-            description: "Mesa em MDF com tampo lacado, capacidade para 6 a 8 pessoas",
-            stock: 8,
-            code: "MES002",
-            images: ["mesa1.jpg"],
-            status: "active"
-        },
-        {
-            id: 3,
-            name: "Roupeiro Capelinha Branco",
-            category: "Armários",
-            price: 1299.90,
-            description: "Roupeiro branco brilho com 6 portas e 2 gavetas",
-            stock: 3,
-            code: "ARM003",
-            images: ["armario1.jpg"],
-            status: "low"
-        },
-        {
-            id: 4,
-            name: "Cama Box Queen Size",
-            category: "Camas",
-            price: 1599.90,
-            description: "Cama box com colchão incluso, estrutura em madeira",
-            stock: 0,
-            code: "CAM004",
-            images: ["cama1.jpg"],
-            status: "out"
-        }
-    ];
-
-    let categories = ["Sofás", "Mesas", "Armários", "Camas", "Cadeiras", "Decoração"];
-
     // Elementos do DOM
     const productsTable = document.getElementById('products-table');
     const productsTableBody = productsTable.querySelector('tbody');
@@ -73,21 +23,66 @@ document.addEventListener('DOMContentLoaded', function() {
     // Variáveis de estado
     let currentProductId = null;
     let isEditMode = false;
+    let products = [];
+    let categories = [];
+
+    // URL do arquivo JSON
+    const JSON_URL = 'json/produtos.json';
 
     // Inicialização
-    loadProducts();
-    loadCategories();
+    fetchProducts();
     setupEventListeners();
+
+    // Função para carregar produtos do JSON
+    async function fetchProducts() {
+        try {
+            const response = await fetch(JSON_URL);
+            if (!response.ok) {
+                throw new Error('Erro ao carregar produtos');
+            }
+            const data = await response.json();
+            products = data.produtos;
+            
+            // Extrair categorias únicas dos produtos
+            const uniqueCategories = new Set(products.map(p => p.categoria));
+            categories = Array.from(uniqueCategories);
+            
+            loadProducts();
+            loadCategories();
+        } catch (error) {
+            console.error('Erro:', error);
+            showAlert('Erro ao carregar produtos do servidor', 'error');
+        }
+    }
+
+    // Função para salvar produtos no JSON (simulado - em produção seria uma chamada API)
+    async function saveProducts() {
+        try {
+            // Em um ambiente real, você faria uma chamada fetch para um endpoint de API
+            // que atualizaria o arquivo JSON no servidor
+            // Aqui estamos apenas simulando o comportamento
+            
+            // Atualizar categorias únicas
+            const uniqueCategories = new Set(products.map(p => p.categoria));
+            categories = Array.from(uniqueCategories);
+            
+            loadCategories();
+            showAlert('Produtos atualizados com sucesso!', 'success');
+        } catch (error) {
+            console.error('Erro ao salvar produtos:', error);
+            showAlert('Erro ao salvar produtos', 'error');
+        }
+    }
 
     // Funções principais
     function loadProducts(filterCategory = '', searchTerm = '') {
         productsTableBody.innerHTML = '';
         
         const filteredProducts = products.filter(product => {
-            const matchesCategory = filterCategory === '' || product.category === filterCategory;
+            const matchesCategory = filterCategory === '' || product.categoria === filterCategory;
             const matchesSearch = searchTerm === '' || 
-                product.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                product.code.toLowerCase().includes(searchTerm.toLowerCase());
+                product.nome.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                product.id.toString().includes(searchTerm.toLowerCase());
             return matchesCategory && matchesSearch;
         });
         
@@ -99,17 +94,18 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         filteredProducts.forEach(product => {
+            const status = getProductStatus(product);
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${product.id}</td>
-                <td><img src="assets/${product.images[0] || 'placeholder.jpg'}" alt="${product.name}" class="product-image"></td>
-                <td>${product.name}</td>
-                <td>${product.category}</td>
-                <td>R$ ${product.price.toFixed(2)}</td>
-                <td>${product.stock}</td>
-                <td><span class="status-badge status-${product.status}">${
-                    product.status === 'active' ? 'Disponível' : 
-                    product.status === 'low' ? 'Estoque Baixo' : 'Esgotado'
+                <td><img src="assets/${product.imagens[0] || 'placeholder.jpg'}" alt="${product.nome}" class="product-image"></td>
+                <td>${product.nome}</td>
+                <td>${product.categoria}</td>
+                <td>${product.promocao ? `<span class="old-price">R$ ${product.preco.toFixed(2)}</span> R$ ${product.precoPromocao.toFixed(2)}` : `R$ ${product.preco.toFixed(2)}`}</td>
+                <td>${product.estoque}</td>
+                <td><span class="status-badge status-${status}">${
+                    status === 'active' ? 'Disponível' : 
+                    status === 'low' ? 'Estoque Baixo' : 'Esgotado'
                 }</span></td>
                 <td>
                     <button class="action-btn edit-btn" data-id="${product.id}"><i class="fas fa-edit"></i></button>
@@ -127,6 +123,16 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.delete-btn').forEach(btn => {
             btn.addEventListener('click', () => deleteProduct(parseInt(btn.dataset.id)));
         });
+    }
+
+    function getProductStatus(product) {
+        if (product.estoque <= 0) {
+            return 'out';
+        } else if (product.estoque <= 5) {
+            return 'low';
+        } else {
+            return 'active';
+        }
     }
 
     function loadCategories() {
@@ -232,22 +238,22 @@ document.addEventListener('DOMContentLoaded', function() {
         currentProductId = product ? product.id : null;
         
         const modalTitle = document.getElementById('modal-title');
-        modalTitle.textContent = isEditMode ? `Editar ${product.name}` : 'Adicionar Novo Produto';
+        modalTitle.textContent = isEditMode ? `Editar ${product.nome}` : 'Adicionar Novo Produto';
         
         if (product) {
-            document.getElementById('product-name').value = product.name;
-            document.getElementById('product-category').value = product.category;
-            document.getElementById('product-price').value = product.price;
-            document.getElementById('product-description').value = product.description;
-            document.getElementById('product-stock').value = product.stock;
-            document.getElementById('product-code').value = product.code;
+            document.getElementById('product-name').value = product.nome;
+            document.getElementById('product-category').value = product.categoria;
+            document.getElementById('product-price').value = product.preco;
+            document.getElementById('product-description').value = product.descricao;
+            document.getElementById('product-stock').value = product.estoque;
+            document.getElementById('product-code').value = product.id;
             
             // Limpar preview de imagens
             const imagePreview = document.getElementById('image-preview');
             imagePreview.innerHTML = '';
             
             // Adicionar imagens existentes ao preview
-            product.images.forEach(image => {
+            product.imagens.forEach(image => {
                 const img = document.createElement('img');
                 img.src = `assets/${image}`;
                 img.className = 'preview-image';
@@ -271,6 +277,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function deleteProduct(id) {
         if (confirm('Tem certeza que deseja excluir este produto?')) {
             products = products.filter(p => p.id !== id);
+            saveProducts();
             loadProducts();
             showAlert('Produto excluído com sucesso!', 'success');
         }
@@ -280,37 +287,30 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
         
         const productData = {
-            name: document.getElementById('product-name').value,
-            category: document.getElementById('product-category').value,
-            price: parseFloat(document.getElementById('product-price').value),
-            description: document.getElementById('product-description').value,
-            stock: parseInt(document.getElementById('product-stock').value),
-            code: document.getElementById('product-code').value,
-            images: [], // Será preenchido com o processamento das imagens
-            status: 'active' // Status será calculado baseado no estoque
+            nome: document.getElementById('product-name').value,
+            categoria: document.getElementById('product-category').value,
+            preco: parseFloat(document.getElementById('product-price').value),
+            descricao: document.getElementById('product-description').value,
+            estoque: parseInt(document.getElementById('product-stock').value),
+            promocao: false,
+            precoPromocao: 0,
+            imagens: [], // Será preenchido com o processamento das imagens
         };
         
         // Processar imagens (simplificado - em produção você faria upload real)
         const imageInput = document.getElementById('product-images');
         if (imageInput.files.length > 0) {
             for (let i = 0; i < imageInput.files.length; i++) {
-                productData.images.push(imageInput.files[i].name);
+                productData.imagens.push(imageInput.files[i].name);
             }
         } else if (isEditMode) {
             // Mantém as imagens existentes se não houver novas
             const existingProduct = products.find(p => p.id === currentProductId);
             if (existingProduct) {
-                productData.images = existingProduct.images;
+                productData.imagens = existingProduct.imagens;
+                productData.promocao = existingProduct.promocao || false;
+                productData.precoPromocao = existingProduct.precoPromocao || 0;
             }
-        }
-        
-        // Determinar status baseado no estoque
-        if (productData.stock <= 0) {
-            productData.status = 'out';
-        } else if (productData.stock <= 5) {
-            productData.status = 'low';
-        } else {
-            productData.status = 'active';
         }
         
         if (isEditMode) {
@@ -329,6 +329,7 @@ document.addEventListener('DOMContentLoaded', function() {
             showAlert('Produto adicionado com sucesso!', 'success');
         }
         
+        saveProducts();
         loadProducts();
         closeAllModals();
     }
@@ -358,6 +359,15 @@ document.addEventListener('DOMContentLoaded', function() {
         const newName = prompt('Editar nome da categoria:', categories[index]);
         if (newName && newName.trim() !== '') {
             categories[index] = newName.trim();
+            
+            // Atualizar a categoria em todos os produtos
+            products.forEach(product => {
+                if (product.categoria === categories[index]) {
+                    product.categoria = newName.trim();
+                }
+            });
+            
+            saveProducts();
             loadCategories();
             showAlert('Categoria atualizada com sucesso!', 'success');
         }
@@ -366,6 +376,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function deleteCategory(index) {
         if (confirm('Tem certeza que deseja excluir esta categoria? Produtos vinculados não serão excluídos.')) {
             categories.splice(index, 1);
+            saveProducts();
             loadCategories();
             showAlert('Categoria excluída com sucesso!', 'success');
         }
@@ -385,7 +396,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const lowStockBody = document.getElementById('low-stock-body');
         lowStockBody.innerHTML = '';
         
-        const lowStockProducts = products.filter(p => p.stock <= 5);
+        const lowStockProducts = products.filter(p => p.estoque <= 5);
         
         if (lowStockProducts.length === 0) {
             lowStockBody.innerHTML = '<tr><td colspan="4">Nenhum produto com estoque baixo</td></tr>';
@@ -395,8 +406,8 @@ document.addEventListener('DOMContentLoaded', function() {
         lowStockProducts.forEach(product => {
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td>${product.name}</td>
-                <td>${product.stock}</td>
+                <td>${product.nome}</td>
+                <td>${product.estoque}</td>
                 <td>5</td>
                 <td>
                     <button class="btn-primary btn-sm" onclick="editProduct(${product.id})">Repor</button>
@@ -411,19 +422,23 @@ document.addEventListener('DOMContentLoaded', function() {
         topProductsBody.innerHTML = '';
         
         // Simulando dados de vendas (em um sistema real, viria do banco de dados)
-        const topProducts = [
-            { name: "Sofá Capelinha 3 Lugares", sales: 42, revenue: 79795.80, stock: 15 },
-            { name: "Mesa de Jantar Retrátil", sales: 28, revenue: 22397.20, stock: 8 },
-            { name: "Cama Box Queen Size", sales: 19, revenue: 30398.10, stock: 0 }
-        ];
+        const topProducts = products
+            .map(p => ({
+                nome: p.nome,
+                vendas: Math.floor(Math.random() * 50), // Simula vendas aleatórias
+                receita: (Math.floor(Math.random() * 50) * p.preco), // Simula receita
+                estoque: p.estoque
+            }))
+            .sort((a, b) => b.vendas - a.vendas)
+            .slice(0, 5);
         
         topProducts.forEach(product => {
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td>${product.name}</td>
-                <td>${product.sales}</td>
-                <td>R$ ${product.revenue.toFixed(2)}</td>
-                <td>${product.stock}</td>
+                <td>${product.nome}</td>
+                <td>${product.vendas}</td>
+                <td>R$ ${product.receita.toFixed(2)}</td>
+                <td>${product.estoque}</td>
             `;
             topProductsBody.appendChild(row);
         });
@@ -441,10 +456,10 @@ document.addEventListener('DOMContentLoaded', function() {
         recentProducts.forEach(product => {
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td>${product.name}</td>
+                <td>${product.nome}</td>
                 <td>${new Date().toLocaleDateString()}</td>
-                <td>${product.category}</td>
-                <td>R$ ${product.price.toFixed(2)}</td>
+                <td>${product.categoria}</td>
+                <td>${product.promocao ? `R$ ${product.precoPromocao.toFixed(2)}` : `R$ ${product.preco.toFixed(2)}`}</td>
             `;
             recentProductsBody.appendChild(row);
         });
@@ -516,12 +531,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Adicionando funções globais para serem acessíveis no HTML
+// Função global para edição de produtos
 function editProduct(id) {
-    window.dispatchEvent(new CustomEvent('editProduct', { detail: id }));
+    document.dispatchEvent(new CustomEvent('editProduct', { detail: id }));
 }
-
-// Dispara o evento quando o DOM estiver carregado
-window.addEventListener('DOMContentLoaded', () => {
-    window.dispatchEvent(new Event('appLoaded'));
-});
