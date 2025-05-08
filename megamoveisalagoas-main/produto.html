@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes do Produto - Mega Móveis Alagoas</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/product.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="images/logo/favicon.png" type="image/png">
+</head>
+<body>
+    <!-- Cabeçalho -->
+    <header id="main-header">
+        <div class="container header-container">
+            <div class="logo">
+                <img src="images/logo/logo-minimalista-dourado-preto.png" alt="Mega Móveis Alagoas">
+                <div class="logo-text">
+                    <h1>Mega Móveis</h1>
+                    <p>Alagoas</p>
+                </div>
+            </div>
+            <nav id="main-nav">
+                <ul>
+                    <li><a href="index.html">Início</a></li>
+                    <li><a href="index.html#categories">Categorias</a></li>
+                    <li><a href="index.html#contact">Contato</a></li>
+                </ul>
+            </nav>
+            <div class="mobile-menu" id="mobile-menu">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="product-page">
+        <div class="container">
+            <div class="breadcrumb">
+                <a href="index.html">Home</a> &gt; 
+                <a href="index.html#categories">Produtos</a> &gt; 
+                <span id="product-category-breadcrumb"></span> &gt; 
+                <span id="product-name-breadcrumb"></span>
+            </div>
+
+            <div class="product-container" id="product-container">
+                <!-- Conteúdo será preenchido via JavaScript -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Produtos Relacionados -->
+    <section class="related-products">
+        <div class="container">
+            <h2>Produtos Relacionados</h2>
+            <div class="product-grid" id="related-products-grid">
+                <!-- Produtos relacionados serão inseridos aqui via JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Rodapé -->
+    <footer id="contact">
+        <div class="container footer-container">
+            <div class="footer-info">
+                <h3>Mega Móveis</h3>
+                <p>Estabelecimento comercial de venda a retalho</p>
+                <p>Av. Pretestato Ferreira Machado 1035, Jatiúca</p>
+            </div>
+            <div class="footer-contact">
+                <h3>Contato</h3>
+                <p><i class="fas fa-phone"></i> (82) 98106-2123</p>
+                <p><i class="fas fa-envelope"></i> contato@megamoveisal.com</p>
+                <p><i class="fas fa-clock"></i> Seg-Sex: 9h-18h | Sáb: 9h-13h</p>
+            </div>
+            <div class="footer-social">
+                <h3>Redes Sociais</h3>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>&copy; 2023 Mega Móveis Alagoas. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <!-- Modal para imagens -->
+    <div class="image-modal" id="image-modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <img id="modal-image" src="" alt="Imagem ampliada">
+        </div>
+    </div>
+
+    <script src="js/product.js"></script>
+</body>
+</html>
