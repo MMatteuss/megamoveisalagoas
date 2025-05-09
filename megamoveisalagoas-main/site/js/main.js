@@ -95,65 +95,107 @@ document.addEventListener('DOMContentLoaded', function() {
         configurarCarrossel();
     }
 
-    function carregarPromocoes(produtos) {
-        const carouselTrack = document.getElementById('carousel-track');
-        carouselTrack.innerHTML = '';
-        
-        // Filtra produtos em promoção
-        const promocoes = produtos.filter(p => p.promocao && p.estoque > 0);
-        
-        if (promocoes.length === 0) {
-            carouselTrack.innerHTML = `
-                <div class="sem-promocoes">
-                    <i class="fas fa-tag"></i>
-                    <p>Nenhuma promoção no momento</p>
-                </div>
-            `;
+    let currentSlide = 0; // Começa com o slide central
+let carouselInterval;
 
-            // ADICIONE AQUI O CÓDIGO DE ESTILO
-            const style = document.createElement('style');
-            style.textContent = `
-                .sem-promocoes {
-                    text-align: center;
-                    padding: 2rem;
-                    color: #666;
-                    width: 100%;
-                }
-                .sem-promocoes i {
-                    font-size: 3rem;
-                    color: #ccc;
-                    margin-bottom: 1rem;
-                }
-                .sem-promocoes p {
-                    font-size: 1.2rem;
-                }
-            `;
-            document.head.appendChild(style);
-            
-            return;
-        }
+function carregarPromocoes(produtos) {
+    const carouselTrack = document.getElementById('carousel-track');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    
+    carouselTrack.innerHTML = '';
+    
+    const promocoes = produtos.filter(p => p.promocao && p.estoque > 0);
+    
+    if (promocoes.length === 0) {
+        carouselTrack.innerHTML = '<div class="sem-promocoes">Nenhuma promoção no momento</div>';
+        prevBtn.style.display = 'none';
+        nextBtn.style.display = 'none';
+        return;
+    }
+    
+    // Criar slides
+    promocoes.forEach((produto, index) => {
+        const desconto = Math.round(((produto.preco - produto.precoPromocao) / produto.preco) * 100);
         
-        // Restante do código do carrossel...
-        promocoes.forEach(produto => {
-            const desconto = Math.round(((produto.preco - produto.precoPromocao) / produto.preco) * 100);
-            
-            const slide = document.createElement('div');
-            slide.className = 'carousel-slide';
-            slide.innerHTML = `
-                <img src="${produto.imagens[0]}" alt="${produto.nome}" onerror="this.src='${IMG_PADRAO}'">
+        const slide = document.createElement('div');
+        slide.className = `carousel-slide ${index === currentSlide ? 'active' : ''}`;
+        slide.innerHTML = `
+            <div class="carousel-slide-inner">
+                <div class="discount-badge">-${desconto}%</div>
+                <img src="${produto.imagens[0]}" alt="${produto.nome}">
                 <div class="product-info">
                     <h3>${produto.nome}</h3>
                     <div class="price-container">
                         <span class="current-price">R$ ${produto.precoPromocao.toFixed(2)}</span>
                         <span class="old-price">R$ ${produto.preco.toFixed(2)}</span>
-                        <span class="discount-badge">-${desconto}%</span>
                     </div>
-                    <a href="produto.html?id=${produto.id}" class="btn">Ver Detalhes</a>
+                    <button class="btn">Ver Detalhes</button>
                 </div>
-            `;
-            carouselTrack.appendChild(slide);
-        });
-    }
+            </div>
+        `;
+        carouselTrack.appendChild(slide);
+    });
+    
+    // Centralizar slide ativo inicial
+    centralizarSlideAtivo();
+    
+    // Configurar navegação
+    prevBtn.addEventListener('click', () => {
+        resetInterval();
+        moverCarrossel(-1);
+    });
+    
+    nextBtn.addEventListener('click', () => {
+        resetInterval();
+        moverCarrossel(1);
+    });
+    
+    // Iniciar auto-scroll
+    iniciarAutoScroll();
+}
+
+function centralizarSlideAtivo() {
+    const track = document.getElementById('carousel-track');
+    const slides = document.querySelectorAll('.carousel-slide');
+    if (slides.length === 0) return;
+    
+    const slideAtivo = slides[currentSlide];
+    const slideWidth = slideAtivo.offsetWidth;
+    const containerWidth = document.querySelector('.carousel-container').offsetWidth;
+    const centerPosition = (containerWidth / 2) - (slideWidth / 2) - (currentSlide * slideWidth);
+    
+    track.style.transform = `translateX(${centerPosition}px)`;
+}
+
+function moverCarrossel(direction) {
+    const slides = document.querySelectorAll('.carousel-slide');
+    if (slides.length === 0) return;
+    
+    // Remover classe active
+    slides.forEach(slide => slide.classList.remove('active'));
+    
+    // Atualizar índice
+    currentSlide = (currentSlide + direction + slides.length) % slides.length;
+    
+    // Adicionar classe active
+    slides[currentSlide].classList.add('active');
+    
+    // Centralizar slide
+    centralizarSlideAtivo();
+}
+
+function iniciarAutoScroll() {
+    carouselInterval = setInterval(() => moverCarrossel(1), 5000);
+}
+
+function resetInterval() {
+    clearInterval(carouselInterval);
+    iniciarAutoScroll();
+}
+
+// Redimensionamento da janela
+window.addEventListener('resize', centralizarSlideAtivo);
 
     function carregarCategorias(produtos) {
         const categoryGrid = document.querySelector('.category-grid');
@@ -182,31 +224,47 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function carregarDestaques(produtos) {
-        const productGrid = document.querySelector('.product-grid');
-        productGrid.innerHTML = '';
-        
-        const destaques = produtos.filter(p => p.estoque > 0).slice(0, 8);
-        
-        if (destaques.length === 0) {
-            productGrid.innerHTML = '<div class="sem-produtos">Nenhum produto em destaque</div>';
-            return;
-        }
-        
-        destaques.forEach(produto => {
-            const card = document.createElement('div');
-            card.className = 'product-card';
-            card.innerHTML = `
-                <img src="${produto.imagens[0]}" alt="${produto.nome}" onerror="this.src='${IMG_PADRAO}'">
-                <div class="product-info">
-                    <h3>${produto.nome}</h3>
-                    <span class="price">R$ ${produto.promocao ? produto.precoPromocao.toFixed(2) : produto.preco.toFixed(2)}</span>
-                    <a href="produto.html?id=${produto.id}" class="btn">Ver Detalhes</a>
-                </div>
-            `;
-            productGrid.appendChild(card);
-        });
+function carregarDestaques(produtos) {
+    const productGrid = document.getElementById('product-grid');
+    productGrid.innerHTML = '';
+    
+    // Pegar produtos com estoque (máximo 8)
+    const destaques = produtos.filter(p => p.estoque > 0).slice(0, 8);
+    
+    if (destaques.length === 0) {
+        productGrid.innerHTML = '<div class="sem-produtos">Nenhum produto em destaque no momento</div>';
+        return;
     }
+    
+    destaques.forEach(produto => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        
+        // Verificar se está em promoção para mostrar badge
+        const badge = produto.promocao ? `<span class="product-badge">PROMOÇÃO</span>` : '';
+        
+        card.innerHTML = `
+            ${badge}
+            <img src="${produto.imagens[0]}" alt="${produto.nome}" onerror="this.src='img/img produtos/padrao.png'">
+            <div class="product-info-featured">
+                <h3>${produto.nome}</h3>
+                <span class="price">
+                    ${produto.promocao ? 
+                        `<span class="old-price" style="text-decoration: line-through; color: #999; font-size: 0.9rem; margin-right: 5px;">
+                            R$ ${produto.preco.toFixed(2)}
+                        </span>
+                        R$ ${produto.precoPromocao.toFixed(2)}` 
+                        : `R$ ${produto.preco.toFixed(2)}`
+                    }
+                </span>
+                <button class="btn" onclick="window.location.href='produto.html?id=${produto.id}'">
+                    Ver Detalhes
+                </button>
+            </div>
+        `;
+        productGrid.appendChild(card);
+    });
+}
 
     function configurarCarrossel() {
         const track = document.getElementById('carousel-track');
