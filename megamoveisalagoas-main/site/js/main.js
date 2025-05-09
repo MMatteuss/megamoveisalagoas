@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Configurações iniciais
+    // Configurações
     const IMG_PADRAO = 'img/img produtos/padrao.png';
-    const PLANILHA_PATH = 'planinha Produtos/produtos.xlsx';
+    const PLANILHA_PATH = 'planinha Produtos/produtos.xlsx'; // Caminho direto
     
     // Elementos do DOM
     const mobileMenuBtn = document.querySelector('.mobile-menu');
@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
         link.addEventListener('click', () => nav.classList.remove('active'));
     });
 
-    // Carregar dados iniciais
+    // Inicialização
     init();
 
     async function init() {
@@ -25,10 +25,9 @@ document.addEventListener('DOMContentLoaded', function() {
             
             renderizarPagina(produtos);
         } catch (error) {
-            console.error('Erro ao carregar produtos:', error);
+            console.error('Erro:', error);
             const produtos = dadosExemplo();
             renderizarPagina(produtos);
-            alert('Erro ao carregar produtos. Dados de exemplo serão exibidos.');
         } finally {
             showLoading(false);
         }
@@ -36,36 +35,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async function carregarProdutos() {
         try {
-            // 1. Baixar a planilha
             const response = await fetch(PLANILHA_PATH);
-            if (!response.ok) throw new Error('Erro ao baixar planilha');
+            if (!response.ok) throw new Error('Erro ao carregar planilha');
             
-            // 2. Converter para array buffer
             const arrayBuffer = await response.arrayBuffer();
-            
-            // 3. Ler a planilha
-            const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' });
-            
-            // 4. Pegar a primeira aba
+            const data = new Uint8Array(arrayBuffer);
+            const workbook = XLSX.read(data, { type: 'array' });
             const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-            
-            // 5. Converter para JSON
             const jsonData = XLSX.utils.sheet_to_json(worksheet);
             
-            // 6. Mapear para o formato desejado
             return jsonData.map((row, index) => ({
                 id: row['ID'] || index + 1,
                 nome: row['Nome'] || `Produto ${index + 1}`,
                 categoria: row['Categoria'] || 'Sem Categoria',
                 preco: parseFloat(row['Preço']) || 0,
-                promocao: row['Promoção'] === 'Sim' || false,
+                promocao: row['Promoção'] === 'Sim', // Agora usando "Sim"/"Não"
                 precoPromocao: parseFloat(row['Preço Promo']) || 0,
                 estoque: parseInt(row['Estoque']) || 0,
                 descricao: row['Descrição Resumida'] || '',
-                imagens: [row['Caminho da Imagem'] || IMG_PADRAO]
+                imagens: [row['Caminho Imagem'] || IMG_PADRAO]
             }));
         } catch (error) {
-            console.error('Erro no carregamento da planilha:', error);
+            console.error('Erro no carregamento:', error);
             return [];
         }
     }
@@ -74,11 +65,11 @@ document.addEventListener('DOMContentLoaded', function() {
         return [
             {
                 id: 1,
-                nome: "Sofá Retrátil",
+                nome: "Sofá 3 Lugares Retrátil",
                 categoria: "Sala de Estar",
-                preco: 1999.90,
+                preco: 2499.9,
                 promocao: true,
-                precoPromocao: 1599.90,
+                precoPromocao: 1999.9,
                 estoque: 5,
                 descricao: "Sofá retrátil em couro sintético",
                 imagens: [IMG_PADRAO]
@@ -87,11 +78,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 id: 2,
                 nome: "Cama Queen Size",
                 categoria: "Quarto",
-                preco: 1799.90,
-                promocao: false,
-                precoPromocao: 0,
-                estoque: 8,
-                descricao: "Cama box queen size com cabeceira estofada",
+                preco: 1899,
+                promocao: true,
+                precoPromocao: 1599,
+                estoque: 3,
+                descricao: "Cama com colchão ortopédico",
                 imagens: [IMG_PADRAO]
             }
         ];
@@ -108,10 +99,16 @@ document.addEventListener('DOMContentLoaded', function() {
         const carouselTrack = document.getElementById('carousel-track');
         carouselTrack.innerHTML = '';
         
+        // Filtra produtos em promoção (com "Sim" na coluna Promoção)
         const promocoes = produtos.filter(p => p.promocao && p.estoque > 0);
         
         if (promocoes.length === 0) {
-            carouselTrack.innerHTML = '<div class="sem-promocoes">Nenhuma promoção no momento</div>';
+            carouselTrack.innerHTML = `
+                <div class="sem-promocoes">
+                    <i class="fas fa-tag"></i>
+                    <p>Nenhuma promoção no momento</p>
+                </div>
+            `;
             return;
         }
         
