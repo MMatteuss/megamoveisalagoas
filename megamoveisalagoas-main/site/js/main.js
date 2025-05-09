@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const carouselTrack = document.getElementById('carousel-track');
         carouselTrack.innerHTML = '';
         
-        // Filtra produtos em promoção (com "Sim" na coluna Promoção)
+        // Filtra produtos em promoção
         const promocoes = produtos.filter(p => p.promocao && p.estoque > 0);
         
         if (promocoes.length === 0) {
@@ -109,9 +109,31 @@ document.addEventListener('DOMContentLoaded', function() {
                     <p>Nenhuma promoção no momento</p>
                 </div>
             `;
+
+            // ADICIONE AQUI O CÓDIGO DE ESTILO
+            const style = document.createElement('style');
+            style.textContent = `
+                .sem-promocoes {
+                    text-align: center;
+                    padding: 2rem;
+                    color: #666;
+                    width: 100%;
+                }
+                .sem-promocoes i {
+                    font-size: 3rem;
+                    color: #ccc;
+                    margin-bottom: 1rem;
+                }
+                .sem-promocoes p {
+                    font-size: 1.2rem;
+                }
+            `;
+            document.head.appendChild(style);
+            
             return;
         }
         
+        // Restante do código do carrossel...
         promocoes.forEach(produto => {
             const desconto = Math.round(((produto.preco - produto.precoPromocao) / produto.preco) * 100);
             
