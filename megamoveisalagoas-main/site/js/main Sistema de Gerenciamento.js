@@ -42,6 +42,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const rows = jsonData.slice(1);
             
             // Processa cada linha da planilha
+            // Dentro da função fetchProducts(), modifique o mapeamento dos produtos:
             products = rows.map((row, index) => {
                 // Garante que todas as colunas existam
                 const safeRow = Array.isArray(row) ? row : [];
@@ -55,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     precoPromocao: parseFloat(safeRow[5]) || 0, // Coluna F
                     estoque: parseInt(safeRow[6]) || 0, // Coluna G
                     descricao: safeRow[7] || '', // Coluna H
-                    imagens: [`produto_${index + 1}.jpg`] // Gera nome de imagem padrão
+                    imagens: safeRow[8] ? [safeRow[8]] : [`produto_${index + 1}.jpg`] // Coluna I - Caminho da Imagem
                 };
             }).filter(product => product.nome); // Remove linhas vazias
             
@@ -141,7 +142,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${product.id}</td>
-                <td><img src="assets/${product.imagens[0] || 'placeholder.jpg'}" alt="${product.nome}" class="product-image"></td>
+                <td><img src="${product.imagens[0] || 'assets/placeholder.jpg'}" alt="${product.nome}" class="product-image"></td>
                 <td>${product.nome}</td>
                 <td>${product.categoria}</td>
                 <td>${product.promocao ? `<span class="old-price">R$ ${product.preco.toFixed(2)}</span> R$ ${product.precoPromocao.toFixed(2)}` : `R$ ${product.preco.toFixed(2)}`}</td>
